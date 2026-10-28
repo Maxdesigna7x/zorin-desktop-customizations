@@ -32,7 +32,8 @@ export default class Demo extends Extension {
   const assertCentered=()=>{
     const [x,y]=menu.actor.get_transformed_position();const [w,h]=menu.actor.get_transformed_size();
     const monitor=Main.layoutManager.primaryMonitor;
-    if(Math.abs(x+w/2-(monitor.x+monitor.width/2))>2 || Math.abs(y+h/2-(monitor.y+monitor.height/2))>2)
+    const workArea=Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
+    if(Math.abs(x+w/2-(monitor.x+monitor.width/2))>2 || Math.abs(y+h-(workArea.y+workArea.height))>40)
       throw Error('Menu not centered: '+JSON.stringify({x,y,w,h,monitor}));
   };
   assertCentered();

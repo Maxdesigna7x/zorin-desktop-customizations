@@ -185,7 +185,7 @@
 +}
 --- a/menu.js
 +++ b/menu.js
-@@ -55,6 +55,24 @@
+@@ -55,6 +55,23 @@
          this.actor.connectObject('captured-event', this._onCapturedEvent.bind(this), this);
          this.actor.add_style_class_name('panel-menu');
          this.actor.add_style_class_name('zorin-menu');
@@ -201,11 +201,10 @@
 +            const height = allocation.get_height();
 +            const stageX = Math.max(workArea.x, Math.min(monitor.x + (monitor.width - width) / 2,
 +                workArea.x + workArea.width - width));
-+            const stageY = Math.max(workArea.y, Math.min(monitor.y + (monitor.height - height) / 2,
-+                workArea.y + workArea.height - height));
-+            const [success, x, y] = this.actor.get_parent().transform_stage_point(stageX, stageY);
++            // Keep the native vertical anchor immediately above the panel.
++            const [success, x] = this.actor.get_parent().transform_stage_point(stageX, monitor.y);
 +            if (success)
-+                allocation.set_origin(Math.round(x), Math.round(y));
++                allocation.set_origin(Math.round(x), allocation.y1);
 +        };
          this.actor.accessible_role = Atk.Role.MENU;
  

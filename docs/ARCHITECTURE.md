@@ -49,4 +49,4 @@ El PNG no ejecuta desenfoque en vivo. Es una captura del fondo ya renderizado; c
 
 ## Posición centrada del inicio
 
-Desde v1.1.0, `menu.js` ajusta el origen de la asignación de BoxPointer en cada redistribución, después del cálculo original de GNOME. El centro se calcula con el monitor que contiene el botón de inicio, en ambos ejes; se limita al área de trabajo cuando el tamaño del menú no permite un centrado completo. No se usa la posición horizontal del botón para ubicar el menú. Cambiar la búsqueda, el contenido o los iconos de la barra provoca un cálculo nuevo.
+Desde v1.1.0, `menu.js` ajusta el origen de la asignación de BoxPointer en cada redistribución, después del cálculo original de GNOME. El centro se calcula con el monitor que contiene el botón de inicio, solo en el eje horizontal; se conserva el anclaje vertical nativo a la barra; se limita al área de trabajo cuando el tamaño del menú no permite un centrado completo. No se usa la posición horizontal del botón para ubicar el menú. Cambiar la búsqueda, el contenido o los iconos de la barra provoca un cálculo nuevo.

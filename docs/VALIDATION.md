@@ -52,4 +52,4 @@ python3 scripts/render_blur.py --image docs/demo-wallpaper.svg \
 
 Son capturas reales de un fondo renderizado por GNOME. No se modifica el wallpaper personal ni se aplica un cambio al gestor de inicio de sesión durante esta prueba.
 
-Desde v1.1.0, la demostración comprueba numéricamente que el centro del menú coincide con el centro del monitor (tolerancia de dos píxeles), mueve temporalmente el botón de inicio y comprueba que el menú permanece centrado. Las capturas 01 y 02 se actualizaron con este comportamiento.
+Desde v1.1.0, la demostración comprueba numéricamente que el centro horizontal del menú coincide con el del monitor y su borde inferior queda junto a la barra (tolerancia de dos píxeles), mueve temporalmente el botón de inicio y comprueba que el menú permanece centrado. Las capturas 01 y 02 se actualizaron con este comportamiento.

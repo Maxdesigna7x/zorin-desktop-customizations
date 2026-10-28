@@ -4,7 +4,7 @@ Receta reproducible de la personalización realizada en **Zorin OS 18.1, GNOME S
 
 ## Qué hace
 
-1. **Menú de inicio:** una sección «Favoritos» encima de «Todas las aplicaciones»; su lista es independiente de la barra. El menú se abre siempre en el centro horizontal y vertical de su monitor, sin seguir al botón de inicio. Clic derecho → **Agregar/Quitar de favoritos del inicio**.
+1. **Menú de inicio:** una sección «Favoritos» encima de «Todas las aplicaciones»; su lista es independiente de la barra. El menú se abre siempre en el centro horizontal de su monitor, anclado encima de la barra, sin seguir al botón de inicio. Clic derecho → **Agregar/Quitar de favoritos del inicio**.
 2. **Barra de tareas:** normalmente muestra solo aplicaciones con ventanas abiertas, incluidas las minimizadas. Al pasar el mouse por un **espacio vacío**, aparecen los favoritos en la misma barra. Se ocultan al salir. No hay botón `+` ni ventana desplegable.
 3. **Zonas excluidas:** inicio, mostrar aplicaciones, reloj y grupos de indicadores no activan el efecto, incluidos los huecos internos de esos grupos.
 4. **Animación:** entrada escalonada por opacidad y desplazamiento; corrección explícita del tamaño final para evitar iconos que queden pequeños.

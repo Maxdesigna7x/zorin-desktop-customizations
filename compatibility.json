@@ -13,6 +13,10 @@
       "stylesheet.css": {
         "before": "73d169045f109c7dcbb6c50d956b4d9f391b50691de5aec79d51bda53243748c",
         "after": "b3191f1eca43579d1cdf41742f8702838e5e47a6b6f5d4e810065d0ed11a6612"
+      },
+      "menu.js": {
+        "before": "36c4df7493041255a8eb05e41dcccea66cded072b3eb795cc8adc29cac1395e6",
+        "after": "74b643381c57a7555bced9156d4db800d73db1b5c4604f0a3bd49bdd96722a23"
       }
     },
     "added": [

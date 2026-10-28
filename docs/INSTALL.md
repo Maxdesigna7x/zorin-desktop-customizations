@@ -25,7 +25,7 @@ La sesión de GNOME, GDM y las extensiones de Zorin deben existir de antemano. E
 python3 scripts/customize.py doctor
 ```
 
-Cada archivo debe aparecer como `original compatible` o `personalizado compatible`. Un componente que mezcle estados o incluya un archivo desconocido requiere revisión. `prepare --components menu` no exige compatibilidad de la barra y viceversa.
+Cada archivo debe aparecer como `original compatible` o `personalizado compatible`. Cada archivo puede estar en su versión original o en la personalizada conocida; esto permite actualizar desde la versión anterior del repositorio. Un archivo desconocido requiere revisión. `prepare --components menu` no exige compatibilidad de la barra y viceversa.
 
 ## 2. Preparar sin privilegios
 

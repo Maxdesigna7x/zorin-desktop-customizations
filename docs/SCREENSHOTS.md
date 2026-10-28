@@ -6,7 +6,7 @@ Las capturas muestran la implementación instalada en una sesión GNOME 46 **ais
 
 ![Menú de inicio](images/01-menu-favoritos.png)
 
-La sección superior usa su propio almacenamiento. Debajo permanece la lista completa. Los favoritos elegidos para esta captura difieren de los de la barra para mostrar la independencia de las dos listas.
+El menú está centrado horizontal y verticalmente, independientemente de la posición del botón de inicio. La sección superior usa su propio almacenamiento. Debajo permanece la lista completa. Los favoritos elegidos para esta captura difieren de los de la barra para mostrar la independencia de las dos listas.
 
 ## 2. Acción del menú de inicio
 

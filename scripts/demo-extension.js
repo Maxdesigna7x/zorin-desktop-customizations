@@ -29,6 +29,16 @@ export default class Demo extends Extension {
   sanitize(menu._layout._userButton);
   const avatar=menu._layout._userButton?._avatar;
   if(avatar){avatar.set_style('');avatar.set_child(new St.Icon({icon_name:'avatar-default-symbolic',icon_size:28}));}
+  const assertCentered=()=>{
+    const [x,y]=menu.actor.get_transformed_position();const [w,h]=menu.actor.get_transformed_size();
+    const monitor=Main.layoutManager.primaryMonitor;
+    if(Math.abs(x+w/2-(monitor.x+monitor.width/2))>2 || Math.abs(y+h/2-(monitor.y+monitor.height/2))>2)
+      throw Error('Menu not centered: '+JSON.stringify({x,y,w,h,monitor}));
+  };
+  assertCentered();
+  const oldTranslation=menu.sourceActor.translation_x;
+  menu.sourceActor.translation_x=oldTranslation+100;menu.actor.queue_relayout();await wait(350);assertCentered();
+  menu.sourceActor.translation_x=oldTranslation;menu.actor.queue_relayout();await wait(350);assertCentered();
   await this.shot('01-menu-favoritos','Menú de inicio: favoritos propios arriba; todas las aplicaciones debajo');
   const button=menu._layout._appsSection._favoriteWidgets[1].get_children()[0];
   button.popupMenu();await this.shot('02-menu-clic-derecho','Clic derecho: agregar o quitar favoritos solo del inicio');button._menu?.close();menu.close();

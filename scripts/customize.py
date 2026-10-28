@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Checked, reversible installation of the Zorin Menu/Taskbar customizations."""
-import argparse, datetime, hashlib, json, os, shutil, subprocess, tempfile
+import argparse, datetime, hashlib, json, os, re, shutil, subprocess, tempfile
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 COMPAT = json.loads((REPO / 'compatibility.json').read_text())
@@ -28,15 +28,18 @@ def prepare_component(name, system_root, output):
         states.append(state)
         if state == 'unknown':
             raise RuntimeError(f'{name}: versión no compatible: {source / filename}. No se modificó el sistema.')
-    if len(set(states)) != 1:
-        raise RuntimeError(f'{name}: instalación parcial o mezclada; requiere revisión manual.')
     output.mkdir(parents=True)
     for filename in info['files']:
         target = output / filename
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source / filename, target)
-    if states[0] == 'before':
-        subprocess.run(['patch', '--batch', '--fuzz=0', '-p1', '-i', str(REPO / 'patches' / (name + '.patch'))], cwd=output, check=True, capture_output=True)
+    pending = {filename for filename, state in zip(info['files'], states) if state == 'before'}
+    if pending:
+        sections = re.split(r'(?=^--- a/)', (REPO / 'patches' / (name + '.patch')).read_text(), flags=re.MULTILINE)
+        selected = ''.join(section for section in sections if section.startswith('--- a/') and section.splitlines()[0][6:] in pending)
+        if not selected:
+            raise RuntimeError('No hay parche para los archivos pendientes.')
+        subprocess.run(['patch', '--batch', '--fuzz=0', '-p1'], input=selected, text=True, cwd=output, check=True, capture_output=True)
     for filename, hashes in info['files'].items():
         if digest(output / filename) != hashes['after']:
             raise RuntimeError('El parche no produjo el resultado esperado: ' + filename)

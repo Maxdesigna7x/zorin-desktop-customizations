@@ -183,3 +183,30 @@
 +    padding: 8px 12px 18px;
 +    color: #aaaaaa;
 +}
+--- a/menu.js
++++ b/menu.js
+@@ -55,6 +55,24 @@
+         this.actor.connectObject('captured-event', this._onCapturedEvent.bind(this), this);
+         this.actor.add_style_class_name('panel-menu');
+         this.actor.add_style_class_name('zorin-menu');
++        // Center the menu on its monitor on every allocation, not on the
++        // moving start button. Re-evaluate after resizing/search or panel changes.
++        const originalReposition = this._boxPointer._reposition.bind(this._boxPointer);
++        this._boxPointer._reposition = allocation => {
++            originalReposition(allocation);
++            const index = Main.layoutManager.findIndexForActor(this.sourceActor);
++            const monitor = Main.layoutManager.monitors[index] ?? Main.layoutManager.primaryMonitor;
++            const workArea = Main.layoutManager.getWorkAreaForMonitor(index >= 0 ? index : Main.layoutManager.primaryIndex);
++            const width = allocation.get_width();
++            const height = allocation.get_height();
++            const stageX = Math.max(workArea.x, Math.min(monitor.x + (monitor.width - width) / 2,
++                workArea.x + workArea.width - width));
++            const stageY = Math.max(workArea.y, Math.min(monitor.y + (monitor.height - height) / 2,
++                workArea.y + workArea.height - height));
++            const [success, x, y] = this.actor.get_parent().transform_stage_point(stageX, stageY);
++            if (success)
++                allocation.set_origin(Math.round(x), Math.round(y));
++        };
+         this.actor.accessible_role = Atk.Role.MENU;
+ 
+         Main.uiGroup.add_child(this.actor);

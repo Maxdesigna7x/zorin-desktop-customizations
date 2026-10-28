@@ -1,0 +1,39 @@
+{
+  "menu": {
+    "uuid": "zorin-menu@zorinos.com",
+    "files": {
+      "sections.js": {
+        "before": "d32f98b7181543332085b43fd357b86354e06e3440a8db7055577efbf7b73e89",
+        "after": "6b56e7ad126383c577c3b0e169578a09444bd1493bae0852869f601d993a9d03"
+      },
+      "widgets/secondaryMenu.js": {
+        "before": "9bbc6eaa31a3a7274390cd25b30f544e537a834825a14a50935eabc44b3a0d31",
+        "after": "880773dbc28e392e23e643d58d120873b106ddc3dd0dce84b280eb881c7814ad"
+      },
+      "stylesheet.css": {
+        "before": "73d169045f109c7dcbb6c50d956b4d9f391b50691de5aec79d51bda53243748c",
+        "after": "b3191f1eca43579d1cdf41742f8702838e5e47a6b6f5d4e810065d0ed11a6612"
+      }
+    },
+    "added": [
+      "menuFavorites.js",
+      "schemas/org.gnome.shell.extensions.zorin-menu.favorites.gschema.xml"
+    ]
+  },
+  "taskbar": {
+    "uuid": "zorin-taskbar@zorinos.com",
+    "files": {
+      "taskbar.js": {
+        "before": "51ce4931393dcfc2d2dc1ef52e52c38ba40822b6608596044a0dfa318922a2d8",
+        "after": "43414f5e4179b50c1bb329381a7fb1c6683e5be6757f2131a5240fb24cd4be3a"
+      },
+      "stylesheet.css": {
+        "before": "eb6252ab29ec63cbe320e28ad43ce8d79d77d5fc82f68688188be64e44bd9ac0",
+        "after": "5ffbb8e90600be0b6559bde4b710b6baccc3fd37de0638e1a965fe20f87ae62f"
+      }
+    },
+    "added": [
+      "compactFavorites.js"
+    ]
+  }
+}

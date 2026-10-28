@@ -1,0 +1,185 @@
+--- a/sections.js
++++ b/sections.js
+@@ -23,6 +23,7 @@
+ import GObject from 'gi://GObject';
+ import St from 'gi://St';
+ 
++import * as MenuFavorites from './menuFavorites.js';
+ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+ import * as SystemActions from 'resource:///org/gnome/shell/misc/systemActions.js';
+ import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+@@ -464,6 +465,8 @@
+         super._init({ x_expand: true, y_expand: true, style_class: 'apps-list', accessible_name: _('Applications')});
+         this._appsBackend = appsBackend;
+         this._appButtons = new Map();
++        this._favoriteWidgets = [];
++        this._favoriteUpdateId = 0;
+         this._category = null;
+         this._searchTerms = [];
+         this.searchResults = new Search.SearchResults(isGrid, monitorIndex);
+@@ -486,6 +489,20 @@
+         this.set_child(this._scrollBox);
+         this._load();
+         this._appsBackend.connectObject('reload', this._reload.bind(this), this);
++        if (isGrid) {
++            this._favorites = MenuFavorites.getMenuFavorites();
++            this._favorites.connectObject('changed', () => {
++                // Wait until the context menu has finished handling the click.
++                if (!this._favoriteUpdateId) {
++                    this._favoriteUpdateId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
++                        this._favoriteUpdateId = 0;
++                        if (this._category === 'all_apps')
++                            this.displayAllApps();
++                        return GLib.SOURCE_REMOVE;
++                    });
++                }
++            }, this);
++        }
+         this.connect('destroy', this._onDestroy.bind(this));
+     }
+ 
+@@ -564,6 +581,9 @@
+ 
+     // Clear the apps box
+     _clear() {
++        for (const widget of this._favoriteWidgets)
++            widget.destroy();
++        this._favoriteWidgets = [];
+         Utils.blockHover();
+         if (this.grid) {
+             this.grid.clear();
+@@ -610,11 +630,40 @@
+         let apps = this._appsBackend.getAllApps();
+         this._clear();
+         this._display(apps, true);
++        if (this.grid)
++            this._displayFavorites();
++    }
++
++    _displayFavorites() {
++        const spanish = GLib.get_language_names().some(language => language.startsWith('es'));
++        const favoriteTitle = new St.Label({
++            text: spanish ? 'Favoritos' : 'Favorites',
++            style_class: 'zorin-favorites-heading',
++        });
++        const favorites = this._favorites?.getFavorites() ?? MenuFavorites.getMenuFavorites().getFavorites();
++        const favoritesGrid = new Widgets.Grid(Constants.COLUMN_COUNT, Constants.COLUMN_SPACING, Constants.ROW_SPACING);
++        for (const app of favorites) {
++            const button = new AppMenuItem.AppMenuItem(app, true);
++            button.connectObject('activated', this._activated.bind(this), this);
++            favoritesGrid.add_item(button);
++        }
++        const allTitle = new St.Label({
++            text: spanish ? 'Todas las aplicaciones' : 'All Applications',
++            style_class: 'zorin-favorites-heading',
++        });
++        const favoritesContent = favorites.length > 0 ? favoritesGrid : new St.Label({
++            text: spanish ? 'Clic derecho en una aplicación → Agregar a favoritos' : 'Right-click an application → Add to favorites',
++            style_class: 'zorin-favorites-empty',
++        });
++        if (favorites.length === 0)
++            favoritesGrid.destroy();
++        this._favoriteWidgets = [favoriteTitle, favoritesContent, allTitle];
++        this._favoriteWidgets.forEach((widget, index) => this._appsBox.insert_child_at_index(widget, index));
+     }
+ 
+     grab_key_focus() {
+         let item = this._appsBox.get_first_child();
+-        while (item && item instanceof PopupMenu.PopupSeparatorMenuItem) {
++        while (item && (item instanceof PopupMenu.PopupSeparatorMenuItem || item instanceof St.Label)) {
+             item = item.get_next_sibling()
+         }
+         if (item) {
+@@ -628,6 +677,12 @@
+     }
+ 
+     _onDestroy() {
++        if (this._favoriteUpdateId) {
++            GLib.source_remove(this._favoriteUpdateId);
++            this._favoriteUpdateId = 0;
++        }
++        this._favorites?.disconnectObject(this);
++        this._favorites = null;
+         this._appsBackend?.disconnectObject(this);
+         this._appsBackend = null;
+ 
+--- a/widgets/secondaryMenu.js
++++ b/widgets/secondaryMenu.js
+@@ -29,6 +29,7 @@
+ import * as SystemActions from 'resource:///org/gnome/shell/misc/systemActions.js';
+ import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+ 
++import * as MenuFavorites from '../menuFavorites.js';
+ import * as Constants from '../constants.js';
+ import * as Utils from '../utils.js';
+ 
+@@ -36,7 +37,7 @@
+ export const AppItemMenu = class extends AppMenu.AppMenu {
+     constructor(source) {
+         super(source, St.Side.TOP);
+-        this._enableFavorites = true;
++        this._enableFavorites = false;
+         this._showSingleWindows = true;
+ 
+         this._newWindowItem.connect('activate', () => this.emit('activate-window'));
+@@ -52,6 +53,14 @@
+         this.addMenuItem(this._addToDesktopItem, 7);
+         this.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(), 8);
+ 
++        this._menuFavorites = MenuFavorites.getMenuFavorites();
++        this._menuFavoriteItem = new PopupMenu.PopupMenuItem('');
++        this._menuFavoriteItem.connect('activate', () => {
++            if (this._app)
++                this._menuFavorites.toggleFavorite(this._app.get_id());
++        });
++        this._menuFavorites.connectObject('changed', () => this._updateFavoriteItem(), this);
++        this.addMenuItem(this._menuFavoriteItem, 6);
+         this.setApp(source.app);
+ 
+         Main.uiGroup.add_child(this.actor);
+@@ -61,6 +70,21 @@
+     setApp(app) {
+         super.setApp(app);
+         this._updateAddToDesktopItem();
++    }
++
++    _updateFavoriteItem() {
++        // The inherited taskbar favorite action stays hidden in this menu.
++        super._updateFavoriteItem();
++        if (!this._menuFavoriteItem)
++            return;
++        this._menuFavoriteItem.visible = !!this._app?.app_info && this._menuFavorites.isWritable();
++        if (this._menuFavoriteItem.visible) {
++            const spanish = GLib.get_language_names().some(language => language.startsWith('es'));
++            const favorite = this._menuFavorites.isFavorite(this._app.get_id());
++            this._menuFavoriteItem.label.text = favorite
++                ? (spanish ? 'Quitar de favoritos del inicio' : 'Remove from Start favorites')
++                : (spanish ? 'Agregar a favoritos del inicio' : 'Add to Start favorites');
++        }
+     }
+ 
+     _updateAddToDesktopItem() {
+@@ -123,6 +147,7 @@
+     }
+ 
+     destroy() {
++        this._menuFavorites?.disconnectObject(this);
+         this.actor?.get_parent()?.remove_child(this.actor);
+         super.destroy();
+     }
+--- a/stylesheet.css
++++ b/stylesheet.css
+@@ -176,3 +176,13 @@
+ .zorin-menu .grid-layout-box .session-box .system-menu-action > StIcon {
+     icon-size: 16px;
+ }
++
++/* Personal menu favorites section. */
++.zorin-menu .zorin-favorites-heading {
++    font-weight: bold;
++    padding: 14px 12px 10px;
++}
++.zorin-menu .zorin-favorites-empty {
++    padding: 8px 12px 18px;
++    color: #aaaaaa;
++}

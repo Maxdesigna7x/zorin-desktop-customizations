@@ -1,0 +1,6 @@
+Entorno de referencia: Zorin OS 18.1 / GNOME Shell 46
+
+gdm3	46.2-1ubuntu1~24.04.9+zorin1
+gnome-shell	46.0-0ubuntu6~24.04.16+zorin5
+
+Compatibilidad efectiva comprobada mediante los hashes de compatibility.json.

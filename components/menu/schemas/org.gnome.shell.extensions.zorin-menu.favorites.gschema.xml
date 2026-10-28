@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+ <schema id="org.gnome.shell.extensions.zorin-menu.favorites" path="/org/gnome/shell/extensions/zorin-menu/favorites/">
+  <key name="apps" type="as"><default>[]</default><summary>Start menu favorites</summary></key>
+  <key name="initialized" type="b"><default>false</default><summary>Initial favorites have been copied once</summary></key>
+ </schema>
+</schemalist>

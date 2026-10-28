@@ -1,0 +1,85 @@
+--- a/taskbar.js
++++ b/taskbar.js
+@@ -35,6 +35,7 @@
+ import * as Main from 'resource:///org/gnome/shell/ui/main.js'
+ import { EventEmitter } from 'resource:///org/gnome/shell/misc/signals.js'
+ 
++import { CompactFavorites } from './compactFavorites.js'
+ import * as AppIcons from './appIcons.js'
+ import * as PanelManager from './panelManager.js'
+ import * as PanelSettings from './panelSettings.js'
+@@ -385,12 +386,15 @@
+     }
+ 
+     setAttributes()
++    this._compactFavorites = new CompactFavorites(this)
+ 
+     this._onScrollSizeChange(adjustment)
+     this._connectWorkspaceSignals()
+   }
+ 
+   destroy() {
++    this._compactFavorites?.destroy()
++    this._compactFavorites = null
+     if (this._waitIdleId) {
+       GLib.source_remove(this._waitIdleId)
+       this._waitIdleId = 0
+@@ -756,6 +760,7 @@
+   }
+ 
+   _itemMenuStateChanged(item, opened) {
++    this._compactFavorites?.itemMenuStateChanged(item, opened)
+     // When the menu closes, it calls sync_hover, which means
+     // that the notify::hover handler does everything we need to.
+     if (opened) {
+@@ -888,7 +893,7 @@
+       )
+     }
+ 
+-    return appInfos
++    return this._compactFavorites ? this._compactFavorites.filterInfos(appInfos) : appInfos
+   }
+ 
+   _redisplay() {
+@@ -980,13 +985,15 @@
+ 
+           // Skip animations on first run when adding the initial set
+           // of items, to avoid all items zooming in at once
+-          newAppIcon.show(this._shownInitially)
++          newAppIcon.show(this._shownInitially && !this._compactFavorites?._idleRevealed)
++          this._compactFavorites?.animateItem(newAppIcon, currentPosition)
+         }
+ 
+         ++currentPosition
+       }
+     }
+ 
++    if (this._compactFavorites?._idleRevealed) this._shownInitially = false
+     this._adjustIconSize()
+ 
+     // Workaround for https://bugzilla.gnome.org/show_bug.cgi?id=692744
+@@ -999,6 +1006,7 @@
+     // This will update the size, and the corresponding number for each icon
+     this._updateHotkeysNumberOverlay()
+ 
++    this._compactFavorites?.afterRedisplay()
+     this._shownInitially = true
+   }
+ 
+--- a/stylesheet.css
++++ b/stylesheet.css
+@@ -202,3 +202,14 @@
+ #uiGroup.br25 .zorintaskbarMainPanel .panel-button.clock-display .clock {
+ 	border-radius: 25px;
+ }
++
++/* Personal compact favorites controls. */
++.compact-favorites-toggle { border-radius: 12px; padding: 0; color: #dddddd; }
++.compact-favorites-toggle:hover, .compact-favorites-toggle:focus,
++.compact-favorites-toggle:active { background-color: rgba(255,255,255,0.14); color: white; }
++.compact-favorites-title { font-weight: bold; }
++.compact-favorites-grid { padding: 4px; }
++.compact-favorite-icon { width: 88px; height: 88px; padding: 4px; border-radius: 10px; }
++.compact-favorite-icon:hover, .compact-favorite-icon:focus { background-color: rgba(255,255,255,0.12); }
++.compact-favorite-icon .overview-icon { padding: 4px; }
++.compact-favorite-icon .overview-icon StLabel { font-size: 11px; }

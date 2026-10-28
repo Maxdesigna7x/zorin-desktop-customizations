@@ -1,0 +1,8 @@
+Zorin Menu and Zorin Taskbar patches are derived from GPL-licensed Zorin OS extensions.
+Upstream: https://github.com/ZorinOS/zorin-menu
+Upstream: https://github.com/ZorinOS/zorin-taskbar
+Copyright notices in upstream files remain applicable.
+This repository is not affiliated with Zorin OS.
+GPL-3.0-or-later applies to this distribution; see LICENSE.
+Screenshots use a neutral test session and standard application icons supplied by the OS.
+No original wallpaper, personal favorite list, account tokens or dconf database are included.
